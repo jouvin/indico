@@ -3,9 +3,9 @@
 
 {% block content %}
     <div class="centered-column">
-        {% if active_provider %}
-            <div class="login-container clearfix">
-                <img class="header-logo" src="{{ indico_config.IMAGES_BASE_URL }}/logo_indico.png">
+        <div class="login-container clearfix">
+            <img class="header-logo" src="{{ indico_config.IMAGES_BASE_URL }}/logo_indico.png">
+            {% if active_provider %}
                 {% if login_reason %}
                     <div class="login-reason-box">
                         {{ login_reason }}
@@ -19,40 +19,29 @@
                         data-href="{{ url_for('auth.login_form', provider=active_provider.name) }}">
                     {%- trans name=active_provider.title %}Login with {{ name }}{% endtrans -%}
                 </button>
+            {% else %}
+                {% include 'flashed_messages.html' %}
+            {% endif %}
+        </div>
+        {% set other_providers = providers|reject('equalto', active_provider)|list|sort(attribute='name') %}
+        {% if other_providers %}
+            <div class="titled-rule">
+                {% trans %}or change authentication provider{% endtrans %}
             </div>
-            {% set other_local_providers = providers|rejectattr('is_external')|reject('equalto', active_provider)|list %}
-            {% if other_local_providers %}
-                <div class="titled-rule">
-                    {% trans %}or change authentication provider{% endtrans %}
-                </div>
-                <div class="login-providers providers-with-form">
-                    {% for provider in other_local_providers %}
+                {% for provider in other_providers %}
+                    {% if other_providers.is_external %}
+                        <div class="login-providers external">
+                        <a href="{{ url_for('.login', provider=provider.name, _method='GET') }}"
+                           class="i-button external-provider-{{ provider.name }}">
+                           {{- provider.title -}}
+                        </a>
+                    {% else %}
+                        <div class="login-providers providers-with-form">
                         <button class="i-button provider-with-form" data-provider="{{ provider.title }}"
                                 data-href="{{ url_for('auth.login_form', provider=provider.name) }}">
                             {{- provider.title -}}
                         </button>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        {% else %}
-            <div class="login-container clearfix">
-                <img class="header-logo" src="{{ indico_config.IMAGES_BASE_URL }}/logo_indico.png">
-                {% include 'flashed_messages.html' %}
-            </div>
-        {% endif %}
-        {% set external_providers = providers|selectattr('is_external')|sort(attribute='title') %}
-        {% if external_providers %}
-            {% if active_provider %}
-                <div class="titled-rule">
-                    {% trans %}or connect with{% endtrans %}
-                </div>
-            {% endif %}
-            <div class="login-providers external">
-                {% for provider in external_providers %}
-                    <a href="{{ url_for('.login', provider=provider.name, _method='GET') }}"
-                       class="i-button external-provider-{{ provider.name }}">
-                       {{- provider.title -}}
-                    </a>
+                    {% endif %}
                 {% endfor %}
             </div>
         {% endif %}
