@@ -12,13 +12,20 @@
                     </div>
                 {% endif %}
                 {% include 'flashed_messages.html' %}
-                <div id="form-wrapper">
-                    {{ login_form(active_provider, form) }}
-                </div>
-                <button class="i-button login-form-button" data-provider="{{ active_provider.title }}"
-                        data-href="{{ url_for('auth.login_form', provider=active_provider.name) }}">
-                    {%- trans name=active_provider.title %}Login with {{ name }}{% endtrans -%}
-                </button>
+                {% if active_provider.is_external %}
+                    <a href="{{ url_for('.login', provider=active_provider.name, _method='GET') }}"
+                       class="i-button external-provider-{{ active_provider.name }}">
+                        {%- trans name=active_provider.title %}Login with {{ name }}{% endtrans -%}
+                    </a>
+                {% else %}
+                    <div id="form-wrapper">
+                        {{ login_form(active_provider, form) }}
+                    </div>
+                    <button class="i-button login-form-button" data-provider="{{ active_provider.title }}"
+                            data-href="{{ url_for('auth.login_form', provider=active_provider.name) }}">
+                        {%- trans name=active_provider.title %}Login with {{ name }}{% endtrans -%}
+                    </button>
+                {% endif %}
             {% else %}
                 {% include 'flashed_messages.html' %}
             {% endif %}

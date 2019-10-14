@@ -92,7 +92,7 @@ class RHLogin(RH):
         # Otherwise we show the form for the default provider
         else:
             active_provider = multipass.default_local_auth_provider
-            form = active_provider.login_form() if active_provider else None
+            form = active_provider.login_form() if active_provider  and not active_provider.is_external else None
 
         providers = multipass.auth_providers.values()
         return render_template('auth/login_page.html', form=form, providers=providers, active_provider=active_provider,
